@@ -14,8 +14,8 @@ services:
         max-size: "1k"
         max-file: "3"
     environment:
-      MINIO_ACCESS_KEY: YOUR_MINIO_ACCESS_KEY
-      MINIO_SECRET_KEY: YOUR_MINIO_SECRET_KEY
+      MINIO_ACCESS_KEY: 90197DB1-E4FD-4B6D-8763-48C33A15026B
+      MINIO_SECRET_KEY: 7F6A58C2-F862-4EE8-95DE-375B4A46BD48
     command: server /data
 
   image-resizer:
@@ -32,7 +32,7 @@ services:
         max-file: "3"
     environment:
       IMAGE_HOST: http://minio:9000
-      NGINX_HOST: localhost
+      NGINX_HOST: 192.168.43.128
 
 volumes:
   minio-data:
