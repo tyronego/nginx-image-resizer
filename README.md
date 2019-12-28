@@ -1,14 +1,14 @@
 # nginx-image-resizer
 
-Docker Container of real time image resizing and caching
+Nginx与Mino结合，实时显示mino图片及动态缩略图
+--Docker
 
-## Build Image
+## 构建镜像
 
 ```
 $ docker build -t tyronego/nginx-image-resizer .
 ```
-
-## RUN Image
+## 运行镜像
 
 ```
 $ docker run --restart always \
@@ -19,9 +19,20 @@ $ docker run --restart always \
   tyronego/nginx-image-resizer
 ```
 
-## Paramemter
+## 后台运行镜像
 
-| Parameter   | required | default value |
+```
+$ docker run -itd --restart always \
+  -p 8002:80 \
+  -e NGINX_HOST=localhost \
+  -e IMAGE_HOST="http://localhost:9000" \
+  --name image-resizer \
+  tyronego/nginx-image-resizer
+```
+
+## 参数集
+
+| 参数   | 是否必填 | 默认值 |
 |-------------|--------|----|
 | NGINX_HOST  | true   |    |
 | IMAGE_HOST  | true   |    |
@@ -32,40 +43,39 @@ $ docker run --restart always \
 | CACHE_SIZE | false  | 40m |
 | INACTIVE_TIME | false  | 30d |
 
-## example
+## 例子
 
-Start [minio](https://minio.io/) and nginx-image-resizer using docker-compose.yml
-
-```sh
-$ docker-compose up -d
-```
-
-Default access key and secret key as following. create new bucket and uploade test image.
+默认ACCESS_KEY和SECRET_KEY如下，需要修改docker-compose.yml默认的密钥。
+在Minio上创建新的bucket并上传测试图像。
 
 ```
 MINIO_ACCESS_KEY: YOUR_MINIO_ACCESS_KEY
 MINIO_SECRET_KEY: YOUR_MINIO_SECRET_KEY
 ```
+使用docker-compose.yml启动[minio](https://minio.io/)和nginx-image-resizer
 
-set bucket as public permission.
+```sh
+$ docker-compose up -d
+```
+设置bucket为公开权限(需要下载minio官方的mc包)
 
 ```sh
 $ mc config host add minio http://localhost:9000 MINIO_ACCESS_KEY MINIO_SECRET_KEY
 $ mc policy --recursive public minio/test
 ```
 
-open browser as following
+打开浏览器如下
 
 ```
-# format 1: http://localhost:8002/resize_image_width/bucket_name/image_name
+# 格式 1: http://localhost:8002/resize_image_width/bucket_name/image_name
 http://localhost:8002/300/test/test.png
-# format 2: http://localhost:8002/${image_width}x${image_height}/bucket_name/image_name
+# 格式 2: http://localhost:8002/${image_width}x${image_height}/bucket_name/image_name
 http://localhost:8002/300x200/test/test.png
 ```
 
-## Benchmark
+## 基准测试
 
-without nginx proxy cache:
+没有nginx代理缓存:
 
 ```
 $ echo "GET http://localhost:8002/310/test/26946324088_5b3f0b1464_o.png" | vegeta attack -rate=100 -connections=1 -duration=1s | tee results.bin | vegeta report
@@ -79,7 +89,7 @@ Status Codes  [code:count]             200:100
 Error Set:
 ```
 
-with nginx proxy cache:
+使用nginx代理缓存:
 
 ```
 $ echo "GET http://localhost:8002/310/test/26946324088_5b3f0b1464_o.png" | vegeta attack -rate=100 -connections=1 -duration=1s | tee results.bin | vegeta report
@@ -93,7 +103,7 @@ Status Codes  [code:count]             200:100
 Error Set:
 ```
 
-## Reference
+## 参考
 
 * [Nginx: Real time image resizing and caching](https://github.com/sergejmueller/sergejmueller.github.io/wiki/Nginx:-Real-time-image-resizing-and-caching)
 * [NGINX reverse proxy image resizing + AWS S3](https://medium.com/merapar/nginx-reverse-proxy-image-resizing-aws-cece1db5da01)
